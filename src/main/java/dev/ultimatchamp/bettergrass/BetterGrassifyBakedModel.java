@@ -17,6 +17,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 //? if neo {
@@ -36,11 +37,12 @@ public class BetterGrassifyBakedModel extends ForwardingBakedModel {
 
     @Override
     public void emitBlockQuads(BlockRenderView blockView, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
+        AtomicInteger counter = new AtomicInteger();
         context.pushTransform(quad -> {
             if (BetterGrassifyConfig.instance().betterGrassMode.equals(BetterGrassifyConfig.BetterGrassMode.OFF)) {
                 return true;
             } else if (BetterGrassifyConfig.instance().betterGrassMode.equals(BetterGrassifyConfig.BetterGrassMode.FAST)) {
-                if (quad.nominalFace().getAxis() != Direction.Axis.Y) {
+                if (quad.nominalFace().getAxis() != Direction.Axis.Y && counter.get() <= 9) {
                     if (isSnowy(blockView, pos, pos.up()))
                         spriteBake(quad, blockView.getBlockState(pos.up()), randomSupplier);
                     else
@@ -48,7 +50,7 @@ public class BetterGrassifyBakedModel extends ForwardingBakedModel {
                     return true;
                 }
             } else if (BetterGrassifyConfig.instance().betterGrassMode.equals(BetterGrassifyConfig.BetterGrassMode.FANCY)) {
-                if (quad.nominalFace().getAxis() != Direction.Axis.Y) {
+                if (quad.nominalFace().getAxis() != Direction.Axis.Y && counter.get() <= 9) {
                     Direction face = quad.nominalFace();
 
                     if (canFullyConnect(blockView, state, pos, face)) {
